@@ -1,4 +1,4 @@
-from scraper.cli import main
+from scrapers.cli import main
 
 
 if __name__ == "__main__":
