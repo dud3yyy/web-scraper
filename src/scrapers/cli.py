@@ -6,7 +6,7 @@ from pathlib import Path
 
 from .crawler import Crawler, validate_url
 from .models import PageRecord
-from .writers import write_json
+from writers.json_writer import JSONWriter 
 
 
 def _positive_int(value: str) -> int:
@@ -99,7 +99,8 @@ class ScraperCLI:
                 logger.error("No pages were collected; no output was written.")
                 return 1
             path = _output_path(args.output)
-            write_json(records, path)
+            writer = JSONWriter(path)
+            writer.write(records)
             logger.info("Wrote %s pages to %s", len(records), path)
             return 1 if counter.count else 0
         except (OSError, ValueError, UnicodeError) as exc:

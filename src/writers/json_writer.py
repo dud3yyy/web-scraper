@@ -1,6 +1,6 @@
 import json
 
-from base_writer import BaseWriter
+from writers.base_writer import BaseWriter
 
 
 class JSONWriter(BaseWriter):
