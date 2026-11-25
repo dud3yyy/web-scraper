@@ -29,7 +29,7 @@ def create_session() -> requests.Session:
 
 class Fetcher:
     """A class to fetch web pages with retry logic and error handling."""
-    def __init__(self, timeout: float = 10.0) -> None:
+    def __init__(self, timeout: int = 10) -> None:
         self.timeout = timeout
         self.session = create_session()
 
