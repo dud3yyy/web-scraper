@@ -2,14 +2,13 @@ from urllib.parse import urljoin, urlsplit
 
 from bs4 import BeautifulSoup
 
-from .models import ParsedContent
+from config.models import ParsedContent
 
 
 def parse(html: str, url: str) -> ParsedContent:
     soup = BeautifulSoup(html, "html.parser")
     base = soup.find("base", href=True)
     base_url = urljoin(url, base["href"]) if base else url
-
     def text(tag) -> str:
         return " ".join(tag.get_text(" ", strip=True).split())
 

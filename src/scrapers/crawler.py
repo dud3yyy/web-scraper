@@ -5,7 +5,7 @@ import time
 from urllib.parse import parse_qsl, urlencode, urldefrag, urljoin, urlsplit, urlunsplit
 
 from .fetcher import Fetcher
-from .models import PageRecord
+from config.models import PageRecord
 from .parser import find_next_url, parse
 
 logger = logging.getLogger(__name__)

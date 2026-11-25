@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 from .crawler import Crawler, validate_url
-from .models import PageRecord
+from config.models import PageRecord
 from writers.json_writer import JSONWriter 
 
 
