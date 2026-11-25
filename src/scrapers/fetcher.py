@@ -43,6 +43,15 @@ class Fetcher:
         self.session.close()
 
     def fetch(self, url: str) -> FetchResult:
+        """
+        Fetches the content of a web page.
+        
+        Args:
+            url (str): The URL of the web page to fetch.
+        
+        Returns:
+            FetchResult: The result of the fetch operation.
+        """
         fetched_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         try:
@@ -51,7 +60,15 @@ class Fetcher:
             return FetchResult(url, fetched_at, None, None, error=f"{type(exc).__name__}: {exc}")
 
         def fail(error: str) -> FetchResult:
-
+            """
+            Helper function to create a FetchResult for failed requests.
+            
+            Args:
+                error (str): The error message.
+            
+            Returns:
+                FetchResult: The fetch result indicating failure.
+            """
             return FetchResult(url, fetched_at, response.url, response.status_code, error=error)
 
         if response.status_code != 200:
