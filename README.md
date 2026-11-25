@@ -1,9 +1,34 @@
-# Web Scraper
+﻿# Web Scraper
 
-## Prerequisites
- - uv as a dependency manager
- - python >= 3.12
-## How to run it
-1. Install uv, if you don't already have it: `pip install uv`
-2. Install everything from pyproject.toml and activate the virtual env using: `uv sync`
-3. Run the main entry point: `uv run python src/main.py`
+Scrapes content from HTML pages and saves it as JSON.
+
+## Setup
+
+Requires Python 3.12 or newer. Run from the project folder:
+
+```powershell
+python -m pip install uv
+python -m uv sync --python 3.12
+```
+
+## Run
+
+```powershell
+python -m uv run scraper https://quotes.toscrape.com/ --max-pages 3
+```
+
+Results are saved to `output/results.json`. Running again overwrites the file.
+
+To choose a different output file:
+
+```powershell
+python -m uv run scraper https://www.merrjep.com/ --max-pages 1 --output output/merrjep.json
+```
+
+For all available options:
+
+```powershell
+python -m uv run scraper --help
+```
+
+The scraper reads server-returned HTML; it does not run JavaScript.
