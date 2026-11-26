@@ -245,21 +245,3 @@ class Crawler:
                 current_url = next_url
 
         return records
-
-
-def crawl(
-    start_url: str,
-    max_pages: int = 10,
-    delay: float = 1.0,
-    next_selector: str | None = None,
-    page_param: str | None = None,
-) -> list[PageRecord]:
-    """
-    """
-
-    return Crawler(
-        max_pages=max_pages,
-        delay=delay,
-        next_selector=next_selector,
-        page_param=page_param,
-    ).crawl(start_url)
