@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup, Tag
 
 from config.models import ParsedContent
 from config.constants import MIN_REPEATS, MIN_FIELDS, NEXT_LABELS
-from utils import (
+from scrapers.utils import (
     clean_text,
     unique,
     get_base_url,
