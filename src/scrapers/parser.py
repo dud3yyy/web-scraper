@@ -1,11 +1,17 @@
-
 import json
-from urllib.parse import urljoin, urlsplit
 
 from bs4 import BeautifulSoup, Tag
 
 from config.models import ParsedContent
-from config.constants import MIN_REPEATS, MIN_FIELDS, NEXT_LABELS
+from config.constants import (
+    MIN_REPEATS,
+    MIN_FIELDS,
+    NEXT_LABELS,
+    IGNORED_TAGS,
+    HEADING_TAGS,
+    TABLE_CELL_TAGS,
+    NEXT_LINK_SELECTOR,
+)
 from scrapers.utils import (
     clean_text,
     unique,
@@ -13,7 +19,14 @@ from scrapers.utils import (
     get_http_url,
 )
 
+
 def parse(html: str, url: str) -> ParsedContent:
+    """Parse the HTML content of a web page and extract structured information.
+    Args
+        html (str): The HTML content of the web page.
+        url (str): The URL of the web page.
+    Returns:
+        ParsedContent: A dataclass containing the parsed information, including title, meta tags, JSON-LD data, headings, paragraphs, links, images, tables, and collections."""
     soup = BeautifulSoup(html, "html.parser")
     base_url = get_base_url(soup, url)
 
@@ -31,10 +44,10 @@ def parse(html: str, url: str) -> ParsedContent:
         except (ValueError, TypeError):
             continue
 
-    for tag in soup(["script", "style", "noscript", "template"]):
+    for tag in soup(IGNORED_TAGS):
         tag.decompose()
 
-    collections = _collections(soup, base_url)
+    collections = extract_collections(soup, base_url)
 
     items = [
         item
@@ -60,11 +73,12 @@ def parse(html: str, url: str) -> ParsedContent:
         "json_ld": json_ld,
         "headings": unique([
             {"level": int(tag.name[1]), "text": text}
-            for tag in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
+            for tag in soup.find_all(HEADING_TAGS)
             if (text := clean_text(tag))
         ]),
         "paragraphs": unique([
-            clean_text(tag) for tag in soup.find_all("p")
+            clean_text(tag)
+            for tag in soup.find_all("p")
             if clean_text(tag)
         ]),
         "links": unique([
@@ -79,17 +93,23 @@ def parse(html: str, url: str) -> ParsedContent:
             if (src := get_http_url(base_url, str(tag["src"])))
             and src not in seen_images
         ]),
-        "tables": _tables(soup),
+        "tables": extract_tables(soup),
         "collections": collections,
     }
 
 
-def _tables(soup: BeautifulSoup) -> list[dict]:
+def extract_tables(soup: BeautifulSoup) -> list[dict]:
+    """Extract tables from the BeautifulSoup object and return them as a list of dictionaries.
+    Args:
+        soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML.
+    Returns:
+        list[dict]: A list of dictionaries, each containing the header and rows of a table.
+    """
     tables = []
 
     for table in soup.find_all("table"):
         rows = [
-            [clean_text(cell) for cell in row.find_all(["th", "td"])]
+            [clean_text(cell) for cell in row.find_all(TABLE_CELL_TAGS)]
             for row in table.find_all("tr")
         ]
 
@@ -104,13 +124,18 @@ def _tables(soup: BeautifulSoup) -> list[dict]:
     return tables
 
 
-def _fields(block: Tag) -> dict[str, list[str]]:
+def extract_fields(block: Tag) -> dict[str, list[str]]:
+    """
+    Extract named fields from a BeautifulSoup Tag block and return them as a dictionary.
+    Args:
+        block (Tag): A BeautifulSoup Tag object representing the block to extract fields from.
+    Returns:
+        dict[str, list[str]]: A dictionary containing the extracted fields.
+    """
     fields = {}
 
     for tag in block.find_all(True):
-        key = tag.get("itemprop") or (
-            tag.get("class", [None])[0]
-        )
+        key = tag.get("itemprop") or tag.get("class", [None])[0]
 
         if not key or tag.name == "meta":
             continue
@@ -127,7 +152,14 @@ def _fields(block: Tag) -> dict[str, list[str]]:
     return fields
 
 
-def _collections(soup: BeautifulSoup, base_url: str) -> list[dict]:
+def extract_collections(soup: BeautifulSoup, base_url: str) -> list[dict]:
+    """Extract collections of similar blocks from the BeautifulSoup object and return them as a list of dictionaries.
+    Args:
+        soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML.
+        base_url (str): The base URL of the web page.
+    Returns:
+        list[dict]: A list of dictionaries, each containing the selector, count, and items of a collection.
+    """
     groups = {}
 
     for tag in soup.find_all(class_=True):
@@ -148,11 +180,7 @@ def _collections(soup: BeautifulSoup, base_url: str) -> list[dict]:
         ):
             continue
 
-        parsed = [
-            (block, _fields(block))
-            for block in blocks
-        ]
-
+        parsed = [(block, extract_fields(block)) for block in blocks]
         parsed = [
             (block, fields)
             for block, fields in parsed
@@ -220,16 +248,21 @@ def find_next_url(
     base_url: str,
     selector: str | None = None,
 ) -> str | None:
-
+    """Find the URL of the next page in a paginated web page.
+    Args:
+        html (str): The HTML content of the web page.
+        base_url (str): The base URL of the web page.
+        selector (str | None): An optional CSS selector to find the next link. If not provided, a default selector will be used.
+    Returns:
+        str | None: The URL of the next page, or None if not found.
+    """
     soup = BeautifulSoup(html, "html.parser")
     base_url = get_base_url(soup, base_url)
 
     if selector:
         candidates = soup.select(selector)
     else:
-        candidates = soup.select(
-            'head link[rel~="next"], a[rel~="next"]'
-        )
+        candidates = soup.select(NEXT_LINK_SELECTOR)
 
         for tag in soup.find_all("a", href=True):
             label = " ".join(
