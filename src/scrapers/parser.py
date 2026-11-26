@@ -4,10 +4,7 @@ from urllib.parse import urljoin, urlsplit
 from bs4 import BeautifulSoup, Tag
 
 from config.models import ParsedContent
-
-MIN_REPEATS = 3  # a group needs at least this many sibling blocks
-MIN_FIELDS = 2   # and each block needs at least this many named fields
-
+from config.constants import MIN_REPEATS, MIN_FIELDS, NEXT_LABELS
 
 def _text(tag: Tag | None) -> str:
     return " ".join(tag.get_text(" ", strip=True).split()) if tag else ""
@@ -165,8 +162,6 @@ def _collections(soup: BeautifulSoup, base_url: str) -> list[dict]:
             "items": items,
         })
     return collections
-
-NEXT_LABELS = {"next", "next page", "older", "older posts", "›", "»", "→"}
 
 
 def find_next_url(html: str, base_url: str, selector: str | None = None) -> str | None:
