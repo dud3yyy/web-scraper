@@ -11,6 +11,13 @@ from writers.json_writer import JSONWriter
 
 
 def positive_int(value: str) -> int:
+    """Validate that the provided value is a positive integer.
+    Args:
+        value (str): The value to validate.
+    Returns:
+        int: The validated positive integer.
+    Raises:
+        argparse.ArgumentTypeError: If the value is not a positive integer."""
     try:
         number = int(value)
     except ValueError as exc:
@@ -25,6 +32,13 @@ def positive_int(value: str) -> int:
 
 
 def delay_value(value: str) -> float:
+    """Validate that the provided value is a nonnegative finite number.
+    Args:
+        value (str): The value to validate.
+    Returns:
+        float: The validated nonnegative finite number.
+    Raises:
+        argparse.ArgumentTypeError: If the value is not a nonnegative finite number."""
     try:
         number = float(value)
     except ValueError as exc:
@@ -41,6 +55,7 @@ def delay_value(value: str) -> float:
 
 
 class FailureCounter(logging.Handler):
+    """A logging handler that counts the number of error messages emitted."""
     def __init__(self):
         super().__init__(level=logging.ERROR)
         self.count = 0
@@ -50,6 +65,7 @@ class FailureCounter(logging.Handler):
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build and return the command-line argument parser."""
     parser = argparse.ArgumentParser(
         description="Extract static HTML pages and follow pagination."
     )
@@ -96,6 +112,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def load_urls(args: argparse.Namespace, parser: argparse.ArgumentParser) -> list[str]:
+    """Load and validate URLs from command-line arguments and an optional file.
+    
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments.
+        parser (argparse.ArgumentParser): The argument parser for error reporting.
+    Returns:
+        list[str]: A list of validated unique URLs.
+    Raises:
+            SystemExit: If no valid URLs are provided.
+    """
     urls = list(args.urls)
 
     if args.urls_file:
@@ -127,10 +153,19 @@ def load_urls(args: argparse.Namespace, parser: argparse.ArgumentParser) -> list
 
 
 def output_path(path: Path) -> Path:
+    """Ensure the output path has a .json suffix.
+    
+    Args:
+        path (Path): The intended output path.
+    
+    Returns:
+        Path: The revised output path with the appropriate suffix.
+    """
     return path if path.suffix else path.with_suffix(".json")
 
 
 def run(argv: list[str] | None = None) -> int:
+    """Run the web scraper with the provided command-line arguments."""
     parser = build_parser()
     args = parser.parse_args(argv)
     urls = load_urls(args, parser)
@@ -184,6 +219,7 @@ def run(argv: list[str] | None = None) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Main entry point for the web scraper command-line interface."""
     return run(argv)
 
 

@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-scraper = "scrapers.cli:main"
+scraper = "cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
