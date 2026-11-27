@@ -175,7 +175,7 @@ def run(argv: list[str] | None = None) -> int:
         format="%(levelname)s: %(message)s",
     )
 
-    logger = logging.getLogger("scraper")
+    logger = logging.getLogger("scrapers")
     counter = FailureCounter()
     logger.addHandler(counter)
 

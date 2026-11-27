@@ -135,7 +135,7 @@ def extract_fields(block: Tag) -> dict[str, list[str]]:
     fields = {}
 
     for tag in block.find_all(True):
-        key = tag.get("itemprop") or tag.get("class", [None])[0]
+        key = tag.get("itemprop") or (tag.get("class") or [None])[0]
 
         if not key or tag.name == "meta":
             continue

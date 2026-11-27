@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TypedDict
+from typing import Any, TypedDict
 
 
 class Heading(TypedDict):
@@ -20,10 +20,13 @@ class Image(TypedDict):
 class ParsedContent(TypedDict):
     title: str | None
     meta: dict[str, str]
+    json_ld: list[Any]
     headings: list[Heading]
     paragraphs: list[str]
     links: list[Link]
     images: list[Image]
+    tables: list[dict]
+    collections: list[dict]
 
 
 class PageRecord(ParsedContent):
